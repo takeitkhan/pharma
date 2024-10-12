@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -86,11 +86,11 @@ class _AddPharmacistsState extends State<AddPharmacists> {
       context: context,
       builder: (context) {
         TextEditingController inviteNameController =
-            TextEditingController(text: nameController.text);
+        TextEditingController(text: nameController.text);
 
         return AlertDialog(
           title: Text(
-              'User already exists. Use different email or invite the user.',
+              'User with this email already exists. Add them to this Pharmacy? The password will remain unchanged.',
               style: GoogleFonts.lato(
                 fontSize: 15.sp,
                 color: semiBlack,
@@ -113,29 +113,86 @@ class _AddPharmacistsState extends State<AddPharmacists> {
             ),
           ),
           actions: <Widget>[
+            // Close Button
             TextButton(
-              child: Text('Invite'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: Colors.white, // Text color white
+                ),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: semiBlack, // Background color semiBlack
+                alignment: Alignment.centerLeft, // Left alignment
+              ),
+            ),
+            // Add Now Button
+            TextButton(
+              child: Text('Add Now'),
               onPressed: () async {
-                // Call your Cloud Function to send the invitation email
-                final response = await http.post(
-                  Uri.parse('https://<your-cloud-function-url>'),
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: json.encode({
-                    'email': emailController.text,
-                    'name': inviteNameController.text,
+                String email = emailController.text;
+                String name = inviteNameController.text;
 
-                  }),
-                );
+                try {
+                  // Query Firestore to find user by email
+                  QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+                      .collection("users")
+                      .where("email", isEqualTo: email)
+                      .get();
 
-                if (response.statusCode == 200) {
+                  if (userSnapshot.docs.isNotEmpty) {
+                    // Get the first document (assuming email is unique)
+                    String userId = userSnapshot.docs.first.id;
+
+                    // Add user to the pharmacy collection
+                    await FirebaseFirestore.instance
+                        .collection("pharmacy")
+                        .doc(widget.pharmacyId)
+                        .collection("pharmacies")
+                        .add({"pharmaciesId": userId});
+
+                    Navigator.of(context).pop();
+                    snackBar(context, "User $email added to the pharmacy.");
+                  } else {
+                    // If the user does not exist, you can choose to invite them
+                    UserCredential credential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                      email: email,
+                      password: 'tempPassword123',
+                      // You can set a temporary password
+                    );
+
+                    // Send email verification
+                    await credential.user!.sendEmailVerification();
+
+                    // Store user data in Firestore
+                    await FirebaseFirestore.instance
+                        .collection("users")
+                        .doc(credential.user!.uid)
+                        .set({
+                          "name": name,
+                          "email": credential.user!.email,
+                          "url": "",
+                          "role": "",
+                          "token": "",
+                        });
+
+                    // Add user to the pharmacy collection
+                    await FirebaseFirestore.instance
+                        .collection("pharmacy")
+                        .doc(widget.pharmacyId)
+                        .collection("pharmacies")
+                        .add({"pharmaciesId": credential.user!.uid});
+
+                    Navigator.of(context).pop();
+                    snackBar(context, "Invitation sent to $email");
+                  }
+                } catch (e) {
                   Navigator.of(context).pop();
-                  snackBar(
-                      context, "Invitation sent to ${emailController.text}"
-                  );
-                } else {
-                  snackBar(context, "Failed to send invitation");
+                  snackBar(context, "Failed to send invitation: $e");
                 }
               },
             ),
@@ -144,6 +201,7 @@ class _AddPharmacistsState extends State<AddPharmacists> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -77,12 +77,12 @@ class Authentication with ChangeNotifier {
               .collection("users")
               .doc(value.user!.uid)
               .set({
-                "name": name,
-                "email": value.user!.email,
-                "url": "",
-                "role": fCode.isEmpty ? "" : "contractor",
-                "token": token,
-              });
+            "name": name,
+            "email": value.user!.email,
+            "url": "",
+            "role": fCode.isEmpty ? "" : "contractor",
+            "token": token,
+          });
         },
       ).catchError((error) {
         Navigator.of(context, rootNavigator: true).pop();
@@ -150,17 +150,17 @@ class Authentication with ChangeNotifier {
       );
       Navigator.of(context, rootNavigator: true).pop();
       if (credential.user != null) {
-    await credential.user!.sendEmailVerification();
+        await credential.user!.sendEmailVerification();
         FirebaseFirestore.instance
             .collection("users")
             .doc(credential.user!.uid)
             .set({
-              "name": name,
-              "email": credential.user!.email,
-              "url": "",
-              "role": "",
-              "token": "",
-            });
+          "name": name,
+          "email": credential.user!.email,
+          "url": "",
+          "role": "",
+          "token": "",
+        });
         FirebaseFirestore.instance
             .collection("pharmacy")
             .doc(pharmacyId)
