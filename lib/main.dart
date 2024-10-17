@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pharma/Provider/chat_provider.dart';
@@ -20,8 +19,8 @@ import 'View/Auth/Signin.dart';
 import 'View/Notices/SingleNotice.dart';
 import 'View/profile/Profile.dart';
 import 'FirebaseOptions.dart';
+import 'api/firebase_api.dart';
 import 'initial.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -29,21 +28,12 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 Future _firebaseBackgroundMessage(RemoteMessage message) async {
   if (message.notification != null) {
-
     print("Some notification received");
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   options: const FirebaseOptions(
-  //     apiKey: "AIzaSyAXuKthNAleNpyiIGEoOKyAKje9_2q1dS4",
-  //     appId: "1:924871265359:android:361c37964409bff1e2ae3a",
-  //     messagingSenderId: "924871265359",
-  //     projectId: "pharma-d27ac",
-  //   ),
-  // );
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -55,11 +45,10 @@ void main() async {
       if (message.notification!.title == "Pharma") {
         print("Background Notification Tapped for notice");
         navigatorKey.currentState!.pushNamed("/message", arguments: message);
-      }else{
+      } else {
         print("Background Notification Tapped for chat");
         navigatorKey.currentState!.pushNamed("/holdingPage", arguments: message);
       }
-
     }
   });
 
@@ -69,10 +58,10 @@ void main() async {
   // Listen to background notifications
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
 
-  // to handle foreground notifications
+  // Handle foreground notifications
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     String payloadData = jsonEncode(message.data);
-    print("Got a message in foreground");
+    //print("Got a message in foreground");
     if (message.notification != null) {
       if (message.notification!.title == "Pharma") {
         PushNotifications.showSimpleNotification(
@@ -83,27 +72,24 @@ void main() async {
     }
   });
 
-  // for handling in terminated state
-  final RemoteMessage? message =
-      await FirebaseMessaging.instance.getInitialMessage();
-
+  // Handle notifications when the app is terminated
+  final RemoteMessage? message = await FirebaseMessaging.instance.getInitialMessage();
   if (message != null) {
     print("Launched from terminated state");
-    if (message.notification!.title == "Pharma"){
+    if (message.notification!.title == "Pharma") {
       Future.delayed(Duration(seconds: 1), () {
         navigatorKey.currentState!.pushNamed("/message", arguments: message);
       });
-    }else{
+    } else {
       Future.delayed(Duration(seconds: 1), () {
         navigatorKey.currentState!.pushNamed("/holdingPage", arguments: message);
       });
     }
-
   }
+
   FirebaseMessaging.instance.subscribeToTopic("notice");
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);

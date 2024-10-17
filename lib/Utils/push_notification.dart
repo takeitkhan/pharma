@@ -6,7 +6,8 @@ import '../main.dart';
 class PushNotifications {
   static final _firebaseMessaging = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin
-  _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
   // request notification permission
   static Future init() async {
     await _firebaseMessaging.requestPermission(
@@ -19,31 +20,48 @@ class PushNotifications {
       sound: true,
     );
     // get the device fcm token
-    final token = await _firebaseMessaging.getToken();
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    print("device token: $token");
+    try {
+      final token = await _firebaseMessaging.getToken();
+      print("Device token: $token");
+    } catch (e) {
+      print("Error retrieving token: $e");
+    }
   }
 
-// initalize local notifications
+
   static Future localNotiInit() async {
-    // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+    const String channelId = 'high_priority_notifications'; // Use a consistent channel ID
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
-    final DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings(
-      onDidReceiveLocalNotification: (id, title, body, payload) => null,
+
+    // Initialize the local notifications plugin
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: DarwinInitializationSettings(
+        onDidReceiveLocalNotification: (id, title, body, payload) => null,
+      ),
     );
-    final LinuxInitializationSettings initializationSettingsLinux =
-    LinuxInitializationSettings(defaultActionName: 'Open notification');
-    final InitializationSettings initializationSettings =
-    InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: initializationSettingsDarwin,
-        linux: initializationSettingsLinux);
-    _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onDidReceiveNotificationResponse: onNotificationTap,
         onDidReceiveBackgroundNotificationResponse: onNotificationTap);
+
+    // Create a notification channel
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      channelId,
+      'High Priority Notifications',
+      description: 'Channel for high priority notifications',
+      importance: Importance.max,
+    );
+
+    // Create the notification channel
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
   }
+
+
+
 
   // on tap local notification in foreground
   static void onNotificationTap(NotificationResponse notificationResponse) {
@@ -58,14 +76,24 @@ class PushNotifications {
     required String payload,
   }) async {
     const AndroidNotificationDetails androidNotificationDetails =
-    AndroidNotificationDetails('your channel id', 'your channel name',
-        channelDescription: 'your channel description',
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker');
+    AndroidNotificationDetails(
+      'high_priority_notifications', // Use the same channel ID here
+      'High Priority Notifications', // User-visible channel name
+      channelDescription: 'Channel for high priority notifications', // Use a relevant description
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
+
     const NotificationDetails notificationDetails =
     NotificationDetails(android: androidNotificationDetails);
-    await _flutterLocalNotificationsPlugin
-        .show(0, title, body, notificationDetails, payload: payload);
+    await _flutterLocalNotificationsPlugin.show(
+      0, // Notification ID
+      title,
+      body,
+      notificationDetails,
+      payload: payload,
+    );
   }
+
 }

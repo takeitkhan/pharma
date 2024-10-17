@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -135,13 +134,15 @@ class _LodgedInChatState extends State<LodgedInChat> {
           show = true;
         }
 
-        return show && data.docs[index]["lastMessage"] != ""
+        return show && data.docs[index].data() is Map<String, dynamic> &&
+            (data.docs[index].data() as Map<String, dynamic>).containsKey("lastMessage") &&
+            (data.docs[index].data() as Map<String, dynamic>)["lastMessage"] != ""
             ? Column(
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
               child: IndividualChatInfo(
-                lastMs: data.docs[index]["lastMessage"],
+                lastMs: (data.docs[index].data() as Map<String, dynamic>)["lastMessage"],
                 uid: uid,
               ),
             ),
@@ -154,6 +155,8 @@ class _LodgedInChatState extends State<LodgedInChat> {
           ],
         )
             : const SizedBox();
+
+
       },
       itemCount: data.size, // Use data.size directly
     );
