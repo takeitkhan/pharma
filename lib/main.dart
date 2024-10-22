@@ -28,7 +28,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 Future _firebaseBackgroundMessage(RemoteMessage message) async {
   if (message.notification != null) {
-    print("Some notification received");
+    print("Background Notification received: ${message.notification!.title}");
   }
 }
 
@@ -39,52 +39,34 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // on background notification tapped
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     if (message.notification != null) {
-      if (message.notification!.title == "Pharma") {
-        print("Background Notification Tapped for notice");
-        navigatorKey.currentState!.pushNamed("/message", arguments: message);
-      } else {
-        print("Background Notification Tapped for chat");
-        navigatorKey.currentState!.pushNamed("/holdingPage", arguments: message);
-      }
+      print("Background Notification Tapped: ${message.notification!.title}");
+      navigatorKey.currentState!.pushNamed(
+        "/message",
+        arguments: message,
+      );
     }
   });
 
   PushNotifications.init();
   PushNotifications.localNotiInit();
 
-  // Listen to background notifications
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
-
-  // Handle foreground notifications
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    String payloadData = jsonEncode(message.data);
-    //print("Got a message in foreground");
     if (message.notification != null) {
-      if (message.notification!.title == "Pharma") {
-        PushNotifications.showSimpleNotification(
-            title: message.notification!.title!,
-            body: message.notification!.body!,
-            payload: payloadData);
-      }
+      PushNotifications.showSimpleNotification(
+        title: message.notification!.title!,
+        body: message.notification!.body!,
+        payload: jsonEncode(message.data),
+      );
     }
   });
 
-  // Handle notifications when the app is terminated
   final RemoteMessage? message = await FirebaseMessaging.instance.getInitialMessage();
   if (message != null) {
     print("Launched from terminated state");
-    if (message.notification!.title == "Pharma") {
-      Future.delayed(Duration(seconds: 1), () {
-        navigatorKey.currentState!.pushNamed("/message", arguments: message);
-      });
-    } else {
-      Future.delayed(Duration(seconds: 1), () {
-        navigatorKey.currentState!.pushNamed("/holdingPage", arguments: message);
-      });
-    }
+    navigatorKey.currentState!.pushNamed("/message", arguments: message);
   }
 
   FirebaseMessaging.instance.subscribeToTopic("notice");
@@ -104,6 +86,7 @@ class MyApp extends StatelessWidget {
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Authentication()),
@@ -118,19 +101,20 @@ class MyApp extends StatelessWidget {
         designSize: const Size(360, 800),
         builder: (context, child) {
           return MaterialApp(
-              navigatorKey: navigatorKey,
-              debugShowCheckedModeBanner: false,
-              title: 'LU Bird',
-              theme: _buildTheme(Brightness.light),
-              home: const MiddleOfHomeAndSignIn(),
-              routes: {
-                "SignIn": (ctx) => const SignIn(),
-                "Registration": (ctx) => const Registration(),
-                "MiddleOfHomeAndSignIn": (ctx) => const MiddleOfHomeAndSignIn(),
-                "Profile": (ctx) => const Profile(),
-                "/message": (ctx) => const SingleNotice(),
-                "/holdingPage": (ctx) => const HoldingPage(),
-              });
+            navigatorKey: navigatorKey,
+            debugShowCheckedModeBanner: false,
+            title: 'LU Bird',
+            theme: _buildTheme(Brightness.light),
+            home: const MiddleOfHomeAndSignIn(),
+            routes: {
+              "SignIn": (ctx) => const SignIn(),
+              "Registration": (ctx) => const Registration(),
+              "MiddleOfHomeAndSignIn": (ctx) => const MiddleOfHomeAndSignIn(),
+              "Profile": (ctx) => const Profile(),
+              "/message": (ctx) => const SingleNotice(),
+              "/holdingPage": (ctx) => const HoldingPage(),
+            },
+          );
         },
       ),
     );

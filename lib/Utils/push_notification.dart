@@ -28,14 +28,15 @@ class PushNotifications {
     }
   }
 
-
   static Future localNotiInit() async {
-    const String channelId = 'high_priority_notifications'; // Use a consistent channel ID
+    const String channelId =
+        'high_priority_notifications'; // Use a consistent channel ID
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     // Initialize the local notifications plugin
-    final InitializationSettings initializationSettings = InitializationSettings(
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: DarwinInitializationSettings(
         onDidReceiveLocalNotification: (id, title, body, payload) => null,
@@ -56,12 +57,10 @@ class PushNotifications {
 
     // Create the notification channel
     await _flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
   }
-
-
-
 
   // on tap local notification in foreground
   static void onNotificationTap(NotificationResponse notificationResponse) {
@@ -76,17 +75,18 @@ class PushNotifications {
     required String payload,
   }) async {
     const AndroidNotificationDetails androidNotificationDetails =
-    AndroidNotificationDetails(
+        AndroidNotificationDetails(
       'high_priority_notifications', // Use the same channel ID here
       'High Priority Notifications', // User-visible channel name
-      channelDescription: 'Channel for high priority notifications', // Use a relevant description
+      channelDescription: 'Channel for high priority notifications',
+      // Use a relevant description
       importance: Importance.max,
       priority: Priority.high,
       ticker: 'ticker',
     );
 
     const NotificationDetails notificationDetails =
-    NotificationDetails(android: androidNotificationDetails);
+        NotificationDetails(android: androidNotificationDetails);
     await _flutterLocalNotificationsPlugin.show(
       0, // Notification ID
       title,
@@ -95,5 +95,4 @@ class PushNotifications {
       payload: payload,
     );
   }
-
 }

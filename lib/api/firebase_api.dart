@@ -19,7 +19,8 @@ class FirebaseApi {
     }
   }
 
-  static Future<void> sendPushNotification(String token, String title, String message) async {
+  // Updated method to send notification to a topic
+  static Future<void> sendPushNotificationToTopic(String topic, String title, String message) async {
     try {
       final url = 'https://fcm.googleapis.com/fcm/send';
       final response = await http.post(
@@ -29,7 +30,7 @@ class FirebaseApi {
           'Authorization': 'key=AAAA11afjE8:APA91bHvhOsfthYzR0RRlZ2pwdRwwvBeS0FOvpaI5_sdU8X5TYFwVpGoRr39WrZf9N5OTysmzc8ltc-hmpNnNAwiwmvdqgJAxK0mPRiEyn4OzmWM4muCvfW0mi7SWHrCUTFvo7eA7DdO', // Replace with your server key
         },
         body: jsonEncode({
-          'to': token,
+          'to': '/topics/$topic', // Targeting the topic
           'notification': {
             'title': title,
             'body': message,
@@ -41,7 +42,7 @@ class FirebaseApi {
       );
 
       if (response.statusCode == 200) {
-        print('Notification sent successfully');
+        print('Notification sent successfully to topic: $topic');
       } else {
         print('Error sending notification: ${response.body}');
       }
@@ -50,19 +51,3 @@ class FirebaseApi {
     }
   }
 }
-
-
-
-
-
-// class FirebaseApi {
-//   final _firebaseMessaging = FirebaseMessaging.instance;
-//
-//   Future<void> initNotifications() async {
-//     await _firebaseMessaging.requestPermission();
-//     final fcmToken = await _firebaseMessaging.getToken();
-//     print('Token: $fcmToken');
-//
-//   }
-//
-// }

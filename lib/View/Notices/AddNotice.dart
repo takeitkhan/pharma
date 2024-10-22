@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import '../../Provider/notice_provider.dart';
 import '../../Utils/app_colors.dart';
 import '../../Utils/custom_loading.dart';
@@ -48,7 +46,6 @@ class _AddNoticeState extends State<AddNotice> {
         dateTime: DateTime.now().toString(),
         context: context,
       );
-      _sendNotification();
       Navigator.of(context, rootNavigator: true).pop();
       Navigator.pop(context);
     } catch (e) {
@@ -70,38 +67,6 @@ class _AddNoticeState extends State<AddNotice> {
       Navigator.pop(context);
     } catch (e) {
       Navigator.of(context, rootNavigator: true).pop();
-    }
-  }
-
-  Future<void> _sendNotification() async {
-    var client = http.Client();
-    try {
-      await client.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        body: jsonEncode({
-          'to': '/topics/$databaseName',
-          "priority": "high",
-          'notification': {
-            'title':
-                titleController.text.isEmpty ? 'Pharma' : titleController.text,
-            'body': postController.text.isEmpty
-                ? 'You have a new notice'
-                : postController.text,
-          },
-          'data': {
-            'title': titleController.text,
-            'description': postController.text,
-          },
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'key=YOUR_SERVER_KEY',
-        },
-      );
-    } catch (e) {
-      onError(context, "Something went wrong, cannot send notification");
-    } finally {
-      client.close();
     }
   }
 
@@ -177,7 +142,7 @@ class _AddNoticeState extends State<AddNotice> {
                 },
                 style: ElevatedButton.styleFrom(
                   padding:
-                      EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
+                  EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

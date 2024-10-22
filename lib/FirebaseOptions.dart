@@ -51,7 +51,8 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAXuKthNAleNpyiIGEoOKyAKje9_2q1dS4',
-    appId: '1:924871265359:android:361c37964409bff1e2ae3a',
+    appId: '1:924871265359:android:50bd1f6791d253cfe2ae3a',
+    //appId: '1:924871265359:android:361c37964409bff1e2ae3a',
     messagingSenderId: '924871265359',
     projectId: 'pharma-d27ac',
     storageBucket: 'pharma-d27ac.appspot.com',

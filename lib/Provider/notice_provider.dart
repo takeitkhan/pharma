@@ -1,10 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../Utils/error_dialoge.dart';
 
 class NoticeProvider with ChangeNotifier {
+  final String serverToken =
+      'AAAA11afjE8:APA91bHvhOsfthYzR0RRlZ2pwdRwwvBeS0FOvpaI5_sdU8X5TYFwVpGoRr39WrZf9N5OTysmzc8ltc-hmpNnNAwiwmvdqgJAxK0mPRiEyn4OzmWM4muCvfW0mi7SWHrCUTFvo7eA7DdO'; // Replace with your server key
+
   Future addNewNotice({
     required String postText,
     required String postTitle,
@@ -13,7 +18,8 @@ class NoticeProvider with ChangeNotifier {
     required BuildContext context,
   }) async {
     try {
-      FirebaseFirestore.instance.collection(databaseName).doc().set(
+      // Add notice to Firestore
+      await FirebaseFirestore.instance.collection(databaseName).doc().set(
         {
           "postText": postText,
           "postTitle": postTitle,
@@ -21,11 +27,53 @@ class NoticeProvider with ChangeNotifier {
           "ownerUid": FirebaseAuth.instance.currentUser!.uid,
         },
       );
+
+      // Send notification
+      await _sendNotification(postTitle, postText, databaseName);
+
       notifyListeners();
     } catch (e) {
       return onError(context, "Having problem connecting to the server");
     }
   }
+
+  Future<void> _sendNotification(
+      String title, String body, String databaseName) async {
+    var client = http.Client();
+    try {
+      final response = await client.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$serverToken',
+        },
+        body: jsonEncode({
+          'to': '/topics/$databaseName',
+          "priority": "high",
+          'notification': {
+            'title': title.isEmpty ? 'Community Pharma Connect' : title,
+            'body': body.isEmpty ? 'You have a new notice' : body,
+          },
+          'data': {
+            'title': title,
+            'description': body,
+          },
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        print('Failed to send notification: ${response.body}');
+      }
+    } catch (e) {
+      print("Failed to send notification: $e");
+    } finally {
+      client.close();
+    }
+  }
+
 
   Future addPost({
     required String postText,
@@ -148,12 +196,12 @@ class NoticeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future deleteEvent(String id,String postFrom) async {
+  Future deleteEvent(String id, String postFrom) async {
     await FirebaseFirestore.instance.collection(postFrom).doc(id).delete();
     notifyListeners();
   }
 
-  Future deletePost(String id,String postFrom) async {
+  Future deletePost(String id, String postFrom) async {
     await FirebaseFirestore.instance.collection(postFrom).doc(id).delete();
     notifyListeners();
   }
