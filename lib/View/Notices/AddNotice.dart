@@ -28,8 +28,10 @@ class _AddNoticeState extends State<AddNotice> {
   void initState() {
     super.initState();
     if (widget.documentSnapshot != null) {
-      postController = TextEditingController(text: widget.documentSnapshot!["postText"]);
-      titleController = TextEditingController(text: widget.documentSnapshot!["postTitle"]);
+      postController =
+          TextEditingController(text: widget.documentSnapshot!["postText"]);
+      titleController =
+          TextEditingController(text: widget.documentSnapshot!["postTitle"]);
     } else {
       postController = TextEditingController();
       titleController = TextEditingController();
@@ -80,8 +82,11 @@ class _AddNoticeState extends State<AddNotice> {
           'to': '/topics/$databaseName',
           "priority": "high",
           'notification': {
-            'title': titleController.text.isEmpty ? 'Pharma' : titleController.text,
-            'body': postController.text.isEmpty ? 'You have a new notice' : postController.text,
+            'title':
+                titleController.text.isEmpty ? 'Pharma' : titleController.text,
+            'body': postController.text.isEmpty
+                ? 'You have a new notice'
+                : postController.text,
           },
           'data': {
             'title': titleController.text,
@@ -140,7 +145,8 @@ class _AddNoticeState extends State<AddNotice> {
                       });
                     },
                   ),
-                  Text("To all users", style: GoogleFonts.lato(fontSize: 16.sp)),
+                  Text("To all users",
+                      style: GoogleFonts.lato(fontSize: 16.sp)),
                   SizedBox(width: 20.w),
                   Radio(
                     value: "Contractor",
@@ -152,7 +158,8 @@ class _AddNoticeState extends State<AddNotice> {
                       });
                     },
                   ),
-                  Text("To all contractors", style: GoogleFonts.lato(fontSize: 16.sp)),
+                  Text("To all contractors",
+                      style: GoogleFonts.lato(fontSize: 16.sp)),
                 ],
               ),
               SizedBox(height: 20.h),
@@ -169,14 +176,17 @@ class _AddNoticeState extends State<AddNotice> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   backgroundColor: Colors.black.withOpacity(0.7),
                 ),
                 child: Text(
-                  widget.documentSnapshot == null ? "Post Notice" : "Update Notice",
+                  widget.documentSnapshot == null
+                      ? "Post Notice"
+                      : "Update Notice",
                   style: GoogleFonts.lato(
                     fontSize: 16.sp,
                     color: Colors.white,
@@ -190,7 +200,8 @@ class _AddNoticeState extends State<AddNotice> {
     );
   }
 
-  Padding buildTextField(TextEditingController controller, String labelText, {int maxLine = 1}) {
+  Padding buildTextField(TextEditingController controller, String labelText,
+      {int maxLine = 1}) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 0),
       child: TextField(

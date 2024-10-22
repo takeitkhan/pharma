@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pharma/View/Notices/LoggedInNotice.dart';
 
 import 'Utils/app_colors.dart';
 import 'View/Chat/ChatPage.dart';
@@ -11,7 +10,6 @@ import 'View/Home/home.dart';
 import 'View/Notices/NoticeMiddlePage.dart';
 import 'View/Pharmacy/Pharmacy.dart';
 import 'View/profile/Profile.dart';
-import 'View/Profile/SubPage/ProfileDetail.dart';
 
 class CustomNavigation extends StatefulWidget {
   const CustomNavigation({Key? key}) : super(key: key);

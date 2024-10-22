@@ -82,10 +82,8 @@ flutter {
 dependencies {
 
     implementation 'com.android.support:multidex:2.0.1'
-    //implementation platform('com.google.firebase:firebase-bom:33.4.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation platform('com.google.firebase:firebase-bom:29.1.0')
-    //implementation 'com.google.firebase:firebase-inapp-messaging:20.0.1' // Check for the latest version
     implementation 'com.google.firebase:firebase-inappmessaging-display:19.1.5'
 
     implementation 'com.google.firebase:firebase-auth'

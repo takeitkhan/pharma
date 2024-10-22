@@ -25,7 +25,7 @@ class _NoticeMiddlePageState extends State<NoticeMiddlePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLodgedIn ? const LoggedInNotice() : const LoggedInNotice(),
+      body: isLodgedIn ? const LoggedInNotice() : const LoggedOutNotice(),
     );
   }
 }
