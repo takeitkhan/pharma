@@ -1,15 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import '../Utils/error_dialoge.dart';
+import 'notification_helper.dart';
 
 class NoticeProvider with ChangeNotifier {
-  final String serverToken =
-      'AAAA11afjE8:APA91bHvhOsfthYzR0RRlZ2pwdRwwvBeS0FOvpaI5_sdU8X5TYFwVpGoRr39WrZf9N5OTysmzc8ltc-hmpNnNAwiwmvdqgJAxK0mPRiEyn4OzmWM4muCvfW0mi7SWHrCUTFvo7eA7DdO'; // Replace with your server key
-
   Future addNewNotice({
     required String postText,
     required String postTitle,
@@ -18,7 +13,6 @@ class NoticeProvider with ChangeNotifier {
     required BuildContext context,
   }) async {
     try {
-      // Add notice to Firestore
       await FirebaseFirestore.instance.collection(databaseName).doc().set(
         {
           "postText": postText,
@@ -28,52 +22,25 @@ class NoticeProvider with ChangeNotifier {
         },
       );
 
-      // Send notification
-      await _sendNotification(postTitle, postText, databaseName);
-
-      notifyListeners();
+      // Send notification to all users
+      await sendNotificationToAll(postTitle, postText);
     } catch (e) {
       return onError(context, "Having problem connecting to the server");
     }
   }
 
-  Future<void> _sendNotification(
-      String title, String body, String databaseName) async {
-    var client = http.Client();
-    try {
-      final response = await client.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'key=$serverToken',
-        },
-        body: jsonEncode({
-          'to': '/topics/$databaseName',
-          "priority": "high",
-          'notification': {
-            'title': title.isEmpty ? 'Community Pharma Connect' : title,
-            'body': body.isEmpty ? 'You have a new notice' : body,
-          },
-          'data': {
-            'title': title,
-            'description': body,
-          },
-        }),
-      );
-
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
-      if (response.statusCode != 200) {
-        print('Failed to send notification: ${response.body}');
+  Future<void> sendNotificationToAll(String title, String body) async {
+    final usersSnapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+    for (var userDoc in usersSnapshot.docs) {
+      String deviceToken = userDoc['token'];
+      try {
+        await NotificationService.sendNotification(deviceToken, title, body);
+      } catch (e) {
+        print("Error sending notification to $deviceToken: $e");
       }
-    } catch (e) {
-      print("Failed to send notification: $e");
-    } finally {
-      client.close();
     }
   }
-
 
   Future addPost({
     required String postText,

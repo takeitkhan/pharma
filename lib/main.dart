@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pharma/Provider/chat_provider.dart';
@@ -19,7 +20,6 @@ import 'View/Auth/Signin.dart';
 import 'View/Notices/SingleNotice.dart';
 import 'View/profile/Profile.dart';
 import 'FirebaseOptions.dart';
-import 'api/firebase_api.dart';
 import 'initial.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -118,6 +118,16 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+Future<void> storeTokenInFirestore(String userId, String token) async {
+  try {
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'device_token': token,
+    }, SetOptions(merge: true));
+  } catch (e) {
+    print('Error storing token: $e');
   }
 }
 

@@ -4,9 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../Provider/notice_provider.dart';
-import '../../Utils/app_colors.dart';
 import '../../Utils/custom_loading.dart';
-import '../../Utils/error_dialoge.dart';
 
 class AddNotice extends StatefulWidget {
   AddNotice({Key? key, this.documentSnapshot}) : super(key: key);
