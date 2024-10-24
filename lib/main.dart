@@ -70,7 +70,6 @@ void main() async {
   }
 
   FirebaseMessaging.instance.subscribeToTopic("notice");
-
   runApp(const MyApp());
 }
 
